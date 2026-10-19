@@ -546,6 +546,33 @@ jobs:
         key: build-kernel-${{ env.DEVICE }}${{ env.LOCALVERSION }}${{ env.UPLOADNAME }}
         max-size: 2G
 
+    - name: Fix mmap_sem for lineage 4.19.325
+      if: env.ENABLE_KERNELSU == 'true'
+      run: |
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE/kernel_workspace/android-kernel"
+        FILE=""
+        for c in drivers/kernelsu/util.c KernelSU-Next/kernel/util.c; do
+          [ -f "$c" ] && FILE="$c" && break
+        done
+        if [ -z "$FILE" ]; then
+          echo "util.c not found, skip"
+          exit 0
+        fi
+        echo "Fixing $FILE"
+        # 本机 4.19.325 已回移 mmap_lock，直接改名即可
+        sed -i \
+          -e 's/&mm->mmap_sem/\&mm->mmap_lock/g' \
+          -e 's/&mm->mmap_sem/\&mm->mmap_lock/g' \
+          "$FILE"
+        # 上面两行等价；再保险扫一遍
+        sed -i 's/mmap_sem/mmap_lock/g' "$FILE"
+        if grep -n 'mmap_sem' "$FILE"; then
+          echo "ERROR: mmap_sem still present"
+          exit 1
+        fi
+        grep -n 'mmap_lock' "$FILE" || true
+
     - name: Build kernel
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
