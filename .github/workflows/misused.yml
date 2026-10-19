@@ -1,4 +1,4 @@
-name: (pstar) (MiSuSed) (4.19.325) (LOS23.0 KSU-Next docker lxc nethunter susfs) Build Kernel
+name: (pstar) (MiSuSed) (4.19.325) (LOS23.2 KSU-Next + SUSFS 2.0.0) Build Kernel
 on:
   watch:
     types: [started]
@@ -437,22 +437,57 @@ jobs:
       if: env.ENABLE_KERNELSU == 'true'
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        # KERNELSU_SETUP must point at legacy/kernel/setup.sh (next branch is gone)
         curl -LSs ${{ env.KERNELSU_SETUP }} | bash -s ${{ env.KERNELSU_TAG }}
-        echo "UPLOADNAME=-KernelSU" >> $GITHUB_ENV
+        if [ -d "${{ env.KERNELSU_ROOT }}" ]; then
+          echo "KSU_RESOLVED_COMMIT=$(git -C ${{ env.KERNELSU_ROOT }} rev-parse HEAD)" >> $GITHUB_ENV
+          echo "KernelSU-Next resolved to: $(git -C ${{ env.KERNELSU_ROOT }} rev-parse HEAD)"
+          git -C ${{ env.KERNELSU_ROOT }} log -1 --oneline
+        fi
+        echo "UPLOADNAME=-KernelSU-Next-SUSFS" >> $GITHUB_ENV
 
     - name: Apply KSU-side SUSFS patches
       if: env.ENABLE_KERNELSU == 'true' && env.HAS_KSU_SUSFS_PATCHES != 'true'
       run: |
+        set -euo pipefail
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel/${{ env.KERNELSU_ROOT }}
-        patch -p1 < $GITHUB_WORKSPACE/kernel_workspace/android-kernel/kernel_patches/patches/${{ env.SUSFS_PATCH }}
+        PATCH_FILE=$GITHUB_WORKSPACE/kernel_workspace/android-kernel/kernel_patches/patches/${{ env.SUSFS_PATCH }}
+        if [ ! -f "$PATCH_FILE" ]; then
+          echo "Missing KSU-side SUSFS patch: $PATCH_FILE"
+          ls -la $GITHUB_WORKSPACE/kernel_workspace/android-kernel/kernel_patches/patches/ || true
+          exit 1
+        fi
+        echo "Applying $PATCH_FILE against $(git rev-parse HEAD)"
+        if ! patch -p1 --dry-run < "$PATCH_FILE"; then
+          echo "ERROR: KSU-side SUSFS patch does not apply to this KernelSU-Next snapshot."
+          echo "Pin KERNELSU_TAG in misused.env to an older legacy commit that accepts the patch,"
+          echo "or switch SUSFS_PATCH to another file under lss4/kernel_patches/patches/."
+          exit 1
+        fi
+        patch -p1 < "$PATCH_FILE"
 
     - name: Setup susfs4ksu
       if: env.ENABLE_KERNELSU == 'true'
       run: |
+        set -euo pipefail
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        patch -p1 < $GITHUB_WORKSPACE/kernel_workspace/android-kernel/kernel_patches/patches/${{ env.Kernel_Extra_Version }}/50_add_susfs_in_kernel-${{ env.Kernel_Extra_Version }}-${{ env.SUSFS_VERSION }}.patch
-        cp $GITHUB_WORKSPACE/kernel_workspace/android-kernel/kernel_patches/patches/${{ env.Kernel_Extra_Version }}/susfs-${{ env.SUSFS_VERSION }}/fs/* $GITHUB_WORKSPACE/kernel_workspace/android-kernel/fs/
-        cp $GITHUB_WORKSPACE/kernel_workspace/android-kernel/kernel_patches/patches/${{ env.Kernel_Extra_Version }}/susfs-${{ env.SUSFS_VERSION }}/include/linux/* $GITHUB_WORKSPACE/kernel_workspace/android-kernel/include/linux/
+        KVER=${{ env.Kernel_Extra_Version }}
+        SVER=${{ env.SUSFS_VERSION }}
+        PATCH_FILE=kernel_patches/patches/${KVER}/50_add_susfs_in_kernel-${KVER}-${SVER}.patch
+        SRC_DIR=kernel_patches/patches/${KVER}/susfs-${SVER}
+        if [ ! -f "$PATCH_FILE" ]; then
+          echo "Missing kernel SUSFS patch: $PATCH_FILE"
+          ls -la kernel_patches/patches/${KVER}/ || true
+          exit 1
+        fi
+        if [ ! -d "$SRC_DIR" ]; then
+          echo "Missing SUSFS source dir: $SRC_DIR"
+          exit 1
+        fi
+        echo "Applying kernel SUSFS ${SVER} for ${KVER}"
+        patch -p1 < "$PATCH_FILE"
+        cp ${SRC_DIR}/fs/* fs/
+        cp ${SRC_DIR}/include/linux/* include/linux/
 
     - name: Setup susfs4ksu workaround
       if: env.ENABLE_KERNELSU == 'true'
