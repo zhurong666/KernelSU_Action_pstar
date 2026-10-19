@@ -21,24 +21,24 @@ jobs:
     - name: Prepare Configuration
       run: |
         CONFIG_ENV=misused.env
-        echo "KERNEL_SOURCE=$(cat $CONFIG_ENV | grep -w "KERNEL_SOURCE" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "KERNEL_SOURCE_BRANCH=$(cat $CONFIG_ENV | grep -w "KERNEL_SOURCE_BRANCH" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "KERNEL_CONFIG=$(cat $CONFIG_ENV | grep -w "KERNEL_CONFIG" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "KERNEL_IMAGE_NAME=$(cat $CONFIG_ENV | grep -w "KERNEL_IMAGE_NAME" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "ARCH=$(cat $CONFIG_ENV | grep -w "ARCH" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "ADD_LOCALVERSION_TO_FILENAME=$(cat $CONFIG_ENV | grep -w "ADD_LOCALVERSION_TO_FILENAME" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "EXTRA_CMDS=$(cat $CONFIG_ENV | grep -w "EXTRA_CMDS" | head -n 1 | cut -d ":" -f 2)" >> $GITHUB_ENV
-        echo "ENABLE_KERNELSU=$(cat $CONFIG_ENV | grep -w "ENABLE_KERNELSU" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "KERNELSU_SETUP=$(cat $CONFIG_ENV | grep -w "KERNELSU_SETUP" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "KERNELSU_ROOT=$(cat $CONFIG_ENV | grep -w "KERNELSU_ROOT" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "KERNELSU_TAG=$(cat $CONFIG_ENV | grep -w "KERNELSU_TAG" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "HAS_KSU_SUSFS_PATCHES=$(cat $CONFIG_ENV | grep -w "HAS_KSU_SUSFS_PATCHES" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "KSU_EXPECTED_SIZE=$(cat $CONFIG_ENV | grep -w "KSU_EXPECTED_SIZE" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "KSU_EXPECTED_HASH=$(cat $CONFIG_ENV | grep -w "KSU_EXPECTED_HASH" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "SUSFS_PATCH=$(cat $CONFIG_ENV | grep -w "SUSFS_PATCH" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "SUSFS_VERSION=$(cat $CONFIG_ENV | grep -w "SUSFS_VERSION" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "Kernel_Version=$(cat $CONFIG_ENV | grep -w "Kernel_Version" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-        echo "Kernel_Extra_Version=$(cat $CONFIG_ENV | grep -w "Kernel_Extra_Version" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
+        echo "KERNEL_SOURCE=$(grep -E '^KERNEL_SOURCE=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "KERNEL_SOURCE_BRANCH=$(grep -E '^KERNEL_SOURCE_BRANCH=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "KERNEL_CONFIG=$(grep -E '^KERNEL_CONFIG=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "KERNEL_IMAGE_NAME=$(grep -E '^KERNEL_IMAGE_NAME=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "ARCH=$(grep -E '^ARCH=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "ADD_LOCALVERSION_TO_FILENAME=$(grep -E '^ADD_LOCALVERSION_TO_FILENAME=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "EXTRA_CMDS=$(grep -E '^EXTRA_CMDS:' $CONFIG_ENV | head -n 1 | cut -d ":" -f 2-)" >> $GITHUB_ENV
+        echo "ENABLE_KERNELSU=$(grep -E '^ENABLE_KERNELSU=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "KERNELSU_SETUP=$(grep -E '^KERNELSU_SETUP=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "KERNELSU_ROOT=$(grep -E '^KERNELSU_ROOT=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "KERNELSU_TAG=$(grep -E '^KERNELSU_TAG=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "HAS_KSU_SUSFS_PATCHES=$(grep -E '^HAS_KSU_SUSFS_PATCHES=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "KSU_EXPECTED_SIZE=$(grep -E '^KSU_EXPECTED_SIZE=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "KSU_EXPECTED_HASH=$(grep -E '^KSU_EXPECTED_HASH=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "SUSFS_PATCH=$(grep -E '^SUSFS_PATCH=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "SUSFS_VERSION=$(grep -E '^SUSFS_VERSION=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "Kernel_Version=$(grep -E '^Kernel_Version=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
+        echo "Kernel_Extra_Version=$(grep -E '^Kernel_Extra_Version=' $CONFIG_ENV | head -n 1 | cut -d "=" -f 2-)" >> $GITHUB_ENV
         BASE_CONFIG_ENV=shared.env
         echo "USE_CUSTOM_CLANG=$(cat $BASE_CONFIG_ENV | grep -w "USE_CUSTOM_CLANG" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
         echo "CUSTOM_CLANG_SOURCE=$(cat $BASE_CONFIG_ENV | grep -w "CUSTOM_CLANG_SOURCE" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
@@ -432,19 +432,32 @@ jobs:
             echo "FORMAT_MKBOOTING=$(echo `tools/unpack_bootimg.py --boot_img=boot-source.img --format mkbootimg`)" >> $GITHUB_ENV
             echo "HAVE_SOURCE_BOOT_IMAGE=true" >> $GITHUB_ENV
         fi
-  
+
     - name: Setup KernelSU
       if: env.ENABLE_KERNELSU == 'true'
       run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        # KERNELSU_SETUP must point at legacy/kernel/setup.sh (next branch is gone)
-        curl -LSs ${{ env.KERNELSU_SETUP }} | bash -s ${{ env.KERNELSU_TAG }}
-        if [ -d "${{ env.KERNELSU_ROOT }}" ]; then
-          echo "KSU_RESOLVED_COMMIT=$(git -C ${{ env.KERNELSU_ROOT }} rev-parse HEAD)" >> $GITHUB_ENV
-          echo "KernelSU-Next resolved to: $(git -C ${{ env.KERNELSU_ROOT }} rev-parse HEAD)"
-          git -C ${{ env.KERNELSU_ROOT }} log -1 --oneline
+        set -euo pipefail
+        cd "$GITHUB_WORKSPACE/kernel_workspace/android-kernel"
+        SETUP_URL="${{ env.KERNELSU_SETUP }}"
+        KSU_TAG="${{ env.KERNELSU_TAG }}"
+        KSU_ROOT="${{ env.KERNELSU_ROOT }}"
+        if [ -z "$SETUP_URL" ]; then
+          echo "KERNELSU_SETUP is empty; check misused.env"
+          exit 1
         fi
-        echo "UPLOADNAME=-KernelSU-Next-SUSFS" >> $GITHUB_ENV
+        if [ -z "$KSU_TAG" ]; then
+          echo "KERNELSU_TAG is empty; check misused.env"
+          exit 1
+        fi
+        echo "Using setup: $SETUP_URL"
+        echo "Using tag/commit: $KSU_TAG"
+        curl -LSs "$SETUP_URL" | bash -s -- "$KSU_TAG"
+        if [ -d "$KSU_ROOT" ]; then
+          echo "KSU_RESOLVED_COMMIT=$(git -C "$KSU_ROOT" rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "KernelSU-Next resolved to: $(git -C "$KSU_ROOT" rev-parse HEAD)"
+          git -C "$KSU_ROOT" log -1 --oneline
+        fi
+        echo "UPLOADNAME=-KernelSU-Next-SUSFS" >> "$GITHUB_ENV"
 
     - name: Apply KSU-side SUSFS patches
       if: env.ENABLE_KERNELSU == 'true' && env.HAS_KSU_SUSFS_PATCHES != 'true'
@@ -611,4 +624,3 @@ jobs:
       with:
         name: AnyKernel3${{ env.LOCALVERSION }}${{ env.UPLOADNAME }}-${{ env.DEVICE }}-${{ env.BUILD_TIME }}
         path: kernel_workspace/AnyKernel3/*
-
